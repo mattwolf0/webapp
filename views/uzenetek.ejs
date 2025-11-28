@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Üzenetek – Rádióadók</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<%- include('partials/navbar', { activePage: 'uzenetek' }) %>
+
+<main class="container my-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 mb-0">Beérkezett üzenetek</h1>
+
+    <% if (currentUser && currentUser.role === 'user') { %>
+      <a href="/kapcsolat"
+         class="btn btn-outline-primary btn-sm">
+        Új üzenet küldése
+      </a>
+    <% } %>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+
+      <% const hasUzenetek = Array.isArray(uzenetek) && uzenetek.length > 0; %>
+
+      <% if (hasUzenetek) { %>
+        <div class="table-responsive">
+          <table class="table table-striped table-hover align-middle mb-0">
+            <thead class="table-dark">
+            <tr>
+              <th>ID</th>
+              <th>Név</th>
+              <th>E-mail</th>
+              <th>Tárgy</th>
+              <th>Üzenet</th>
+              <th>Dátum</th>
+              <th>Ki küldte?</th>
+              <% if (currentUser && currentUser.role === 'admin') { %>
+                <th>Művelet</th>
+              <% } %>
+            </tr>
+            </thead>
+            <tbody>
+            <% uzenetek.forEach(function(uzenet) { %>
+              <tr>
+                <td><%= uzenet.id %></td>
+                <td><%= uzenet.kuldoNev %></td>
+                <td><%= uzenet.kuldoEmail %></td>
+                <td><%= uzenet.targy %></td>
+                <td><%= uzenet.szoveg %></td>
+                <td><%= uzenet.letrehozva %></td>
+                <td>
+                  <%= uzenet.adminValasz ? 'Admin válasz' : 'Felhasználó üzenete' %>
+                </td>
+                <% if (currentUser && currentUser.role === 'admin') { %>
+                  <td>
+                    <a href="/admin/uzenetek/<%= uzenet.id %>/valasz"
+                       class="btn btn-sm btn-outline-primary">
+                      Válasz
+                    </a>
+                  </td>
+                <% } %>
+              </tr>
+            <% }); %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <p class="text-muted mb-0">
+          Még nincs beérkezett üzenet.
+        </p>
+      <% } %>
+
+    </div>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

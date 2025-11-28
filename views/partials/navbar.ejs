@@ -1,0 +1,83 @@
+<% const page = typeof activePage !== 'undefined' ? activePage : ''; %>
+<% const isLoggedIn = !!currentUser; %>
+<% const role = currentUser ? currentUser.role : null; %>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold" href="/">RádióAdók</a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+            data-bs-target="#navbarNav" aria-controls="navbarNav"
+            aria-expanded="false" aria-label="Navigáció">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link <%= page === 'index' ? 'active' : '' %>" href="/">Főoldal</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link <%= page === 'adatbazis' ? 'active' : '' %>" href="/adatbazis">Adatbázis</a>
+        </li>
+
+        <% if (isLoggedIn && (role === 'user' || role === 'admin')) { %>
+          <li class="nav-item">
+            <a class="nav-link <%= page === 'kapcsolat' ? 'active' : '' %>" href="/kapcsolat">Kapcsolat</a>
+          </li>
+        <% } %>
+
+        <% if (isLoggedIn) { %>
+          <li class="nav-item">
+            <a class="nav-link <%= page === 'uzenetek' ? 'active' : '' %>" href="/uzenetek">Üzenetek</a>
+          </li>
+        <% } %>
+
+        <li class="nav-item">
+          <a class="nav-link <%= page === 'diagram' ? 'active' : '' %>" href="/diagram">Diagram</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link <%= page === 'crud' ? 'active' : '' %>" href="/crud">CRUD</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link <%= page === 'rest' ? 'active' : '' %>" href="/rest">REST</a>
+        </li>
+
+        <% if (role === 'admin') { %>
+          <li class="nav-item">
+            <a class="nav-link <%= page === 'admin' ? 'active' : '' %>" href="/admin">Admin</a>
+          </li>
+        <% } %>
+      </ul>
+
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <% if (!isLoggedIn) { %>
+          <li class="nav-item">
+            <a class="nav-link <%= page === 'login' ? 'active' : '' %>" href="/login">Bejelentkezés</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link <%= page === 'register' ? 'active' : '' %>" href="/register">Regisztráció</a>
+          </li>
+        <% } else { %>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button"
+               data-bs-toggle="dropdown" aria-expanded="false">
+              <span><%= currentUser.name %></span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li>
+                <form action="/logout" method="post" class="px-3">
+                  <button type="submit" class="btn btn-link p-0">
+                    Kijelentkezés
+                  </button>
+                </form>
+              </li>
+            </ul>
+          </li>
+        <% } %>
+      </ul>
+
+    </div>
+  </div>
+</nav>
