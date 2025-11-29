@@ -48,9 +48,15 @@ router.get('/adatbazis', (req, res) => {
 });
 
 router.get('/kapcsolat', requireLogin, (req, res) => {
+  const currentUser = req.session.user || {};
+
   res.render('kapcsolat', {
     hiba: null,
-    siker: null
+    siker: null,
+    kuldoNev: currentUser.name || currentUser.username || '',
+    kuldoEmail: currentUser.email || '',
+    targy: '',
+    szoveg: ''
   });
 });
 
@@ -60,7 +66,11 @@ router.post('/kapcsolat', requireLogin, (req, res) => {
   if (!kuldoNev || !kuldoEmail || !targy || !szoveg) {
     return res.render('kapcsolat', {
       hiba: 'Minden mező kötelező.',
-      siker: null
+      siker: null,
+      kuldoNev,
+      kuldoEmail,
+      targy,
+      szoveg
     });
   }
 
@@ -77,9 +87,15 @@ router.post('/kapcsolat', requireLogin, (req, res) => {
     adminValasz: false
   });
 
+  const currentUser = req.session.user || {};
+
   res.render('kapcsolat', {
     hiba: null,
-    siker: 'Üzenet elküldve.'
+    siker: 'Üzenet elküldve.',
+    kuldoNev: currentUser.name || currentUser.username || '',
+    kuldoEmail: currentUser.email || '',
+    targy: '',
+    szoveg: ''
   });
 });
 
@@ -94,7 +110,6 @@ router.get('/uzenetek', requireLogin, (req, res) => {
     uzenetek: rendezett
   });
 });
-
 
 router.get('/admin', requireAdmin, (req, res) => {
   res.render('admin', {
