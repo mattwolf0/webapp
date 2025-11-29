@@ -1,57 +1,35 @@
 const express = require('express');
-const bcrypt = require('bcrypt');
-const db = require('../db');
-
 const router = express.Router();
+const db = require('../db');
 
 router.get('/login', (req, res) => {
   res.render('login', {
     activePage: 'login',
     errorMessage: null,
-    infoMessage: req.query.logout ? 'Sikeresen kijelentkeztél.' : null
+    infoMessage: null
   });
 });
 
-router.post('/login', async (req, res) => {
+router.post('/login', (req, res) => {
   const { username, password } = req.body;
+  const user = db.users.find(u => u.username === username && u.password === password);
 
-  try {
-    const [rows] = await db.query('SELECT * FROM users WHERE username = ?', [username]);
-    const user = rows[0];
-
-    if (!user) {
-      return res.status(401).render('login', {
-        activePage: 'login',
-        errorMessage: 'Hibás felhasználónév vagy jelszó.',
-        infoMessage: null
-      });
-    }
-
-    const ok = await bcrypt.compare(password, user.password_hash);
-    if (!ok) {
-      return res.status(401).render('login', {
-        activePage: 'login',
-        errorMessage: 'Hibás felhasználónév vagy jelszó.',
-        infoMessage: null
-      });
-    }
-
-    req.session.user = {
-      id: user.id,
-      name: user.username,
-      email: user.email,
-      role: user.role
-    };
-
-    res.redirect('/');
-  } catch (err) {
-    console.error(err);
-    res.status(500).render('login', {
+  if (!user) {
+    return res.status(401).render('login', {
       activePage: 'login',
-      errorMessage: 'Hiba történt a bejelentkezés közben.',
+      errorMessage: 'Hibás felhasználónév vagy jelszó.',
       infoMessage: null
     });
   }
+
+  req.session.user = {
+    id: user.id,
+    name: user.username,
+    email: user.email,
+    role: user.role
+  };
+
+  res.redirect('/');
 });
 
 router.get('/register', (req, res) => {
@@ -62,7 +40,7 @@ router.get('/register', (req, res) => {
   });
 });
 
-router.post('/register', async (req, res) => {
+router.post('/register', (req, res) => {
   const { username, email, password } = req.body;
 
   if (!username || !email || !password) {
@@ -73,45 +51,34 @@ router.post('/register', async (req, res) => {
     });
   }
 
-  try {
-    const [rows] = await db.query(
-      'SELECT id FROM users WHERE username = ? OR email = ?',
-      [username, email]
-    );
-    if (rows.length > 0) {
-      return res.render('register', {
-        activePage: 'register',
-        hiba: 'Már létezik ilyen felhasználónév vagy e-mail.',
-        siker: null
-      });
-    }
-
-    const hash = await bcrypt.hash(password, 10);
-
-    await db.query(
-      'INSERT INTO users (username, email, password_hash, role) VALUES (?, ?, ?, ?)',
-      [username, email, hash, 'user']
-    );
-
-    res.render('register', {
+  const exists = db.users.some(u => u.username === username || u.email === email);
+  if (exists) {
+    return res.render('register', {
       activePage: 'register',
-      hiba: null,
-      siker: 'Sikeres regisztráció! Most már be tudsz jelentkezni.'
-    });
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).render('register', {
-      activePage: 'register',
-      hiba: 'Hiba történt a regisztráció közben.',
+      hiba: 'Már létezik ilyen felhasználónév vagy e-mail.',
       siker: null
     });
   }
+
+  const id = db.getNextUserId();
+  db.users.push({
+    id,
+    username,
+    email,
+    password,
+    role: 'user'
+  });
+
+  res.render('register', {
+    activePage: 'register',
+    hiba: null,
+    siker: 'Sikeres regisztráció. Most már be tudsz jelentkezni.'
+  });
 });
 
 router.post('/logout', (req, res) => {
   req.session.destroy(() => {
-    res.redirect('/login?logout=1');
+    res.redirect('/login');
   });
 });
 

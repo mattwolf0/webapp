@@ -26,22 +26,13 @@
           <li class="nav-item">
             <a class="nav-link <%= page === 'kapcsolat' ? 'active' : '' %>" href="/kapcsolat">Kapcsolat</a>
           </li>
-        <% } %>
-
-        <% if (isLoggedIn) { %>
           <li class="nav-item">
             <a class="nav-link <%= page === 'uzenetek' ? 'active' : '' %>" href="/uzenetek">Üzenetek</a>
           </li>
         <% } %>
 
         <li class="nav-item">
-          <a class="nav-link <%= page === 'diagram' ? 'active' : '' %>" href="/diagram">Diagram</a>
-        </li>
-        <li class="nav-item">
           <a class="nav-link <%= page === 'crud' ? 'active' : '' %>" href="/crud">CRUD</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link <%= page === 'rest' ? 'active' : '' %>" href="/rest">REST</a>
         </li>
 
         <% if (role === 'admin') { %>

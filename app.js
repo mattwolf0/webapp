@@ -3,6 +3,7 @@ const path = require('path');
 const session = require('express-session');
 
 const pagesRouter = require('./routes/pages');
+const crudRouter = require('./routes/crud');
 const authRouter = require('./routes/auth');
 
 const app = express();
@@ -24,6 +25,7 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use('/crud', crudRouter);
 app.use('/', pagesRouter);
 app.use('/', authRouter);
 
