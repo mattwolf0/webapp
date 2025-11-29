@@ -6,10 +6,11 @@ const dataDir = path.join(__dirname, 'data');
 function loadLines(filename) {
   const fullPath = path.join(dataDir, filename);
   if (!fs.existsSync(fullPath)) {
+    console.warn('Hiányzó adatfájl:', fullPath);
     return [];
   }
-  return fs
-    .readFileSync(fullPath, 'utf8')
+
+  return fs.readFileSync(fullPath, 'utf8')
     .split(/\r?\n/)
     .map(l => l.trim())
     .filter(l => l.length > 0);
@@ -26,60 +27,61 @@ function initRadioData() {
   const teleLines = loadLines('telepules.txt');
   const kiosztasLines = loadLines('kiosztas.txt');
 
-  regiok = regioLines.map(line => {
-    const p = line.split(';');
+  const cleanRegio = regioLines[0] && regioLines[0].toLowerCase().startsWith('nev')
+    ? regioLines.slice(1)
+    : regioLines;
+
+  const cleanTele = teleLines[0] && teleLines[0].toLowerCase().startsWith('nev')
+    ? teleLines.slice(1)
+    : teleLines;
+
+  const cleanKiosztas = kiosztasLines[0] && kiosztasLines[0].toLowerCase().startsWith('frekvencia')
+    ? kiosztasLines.slice(1)
+    : kiosztasLines;
+
+  regiok = cleanRegio.map(line => {
+    const [regioNevRaw, megyeNevRaw] = line.split('\t');
     return {
-      megyeId: parseInt(p[0], 10),
-      megyeNev: p[1] || '',
-      regioNev: p[2] || ''
+      regioNev: (regioNevRaw || '').trim(),
+      megyeNev: (megyeNevRaw || '').trim()
     };
   });
 
-  telepulesek = teleLines.map(line => {
-    const p = line.split(';');
+  telepulesek = cleanTele.map((line, idx) => {
+    const [nevRaw, megyeNevRaw] = line.split('\t');
+    const megyeNev = (megyeNevRaw || '').trim();
+    const regioObj = regiok.find(r => r.megyeNev === megyeNev) || null;
+
     return {
-      id: parseInt(p[0], 10),
-      nev: p[1] || '',
-      megyeId: parseInt(p[2], 10)
+      id: idx + 1,
+      nev: (nevRaw || '').trim(),
+      megyeNev,
+      regioNev: regioObj ? regioObj.regioNev : ''
     };
   });
 
-  const megyeById = {};
-  regiok.forEach(r => {
-    if (!isNaN(r.megyeId)) {
-      megyeById[r.megyeId] = r;
-    }
-  });
-
-  const teleById = {};
+  const teleByName = {};
   telepulesek.forEach(t => {
-    if (!isNaN(t.id)) {
-      teleById[t.id] = t;
+    if (t.nev) {
+      teleByName[t.nev] = t;
     }
   });
 
   adok = [];
   let idCounter = 1;
 
-  kiosztasLines.forEach(line => {
-    const p = line.split(';').map(x => x.trim());
+  cleanKiosztas.forEach(line => {
+    if (!line) return;
 
-    if (p.length === 0) return;
+    const [freqRaw, teljRaw, csatornaRaw, adohelyRaw, cimRaw] = line.split('\t');
 
+    const frekvencia    = (freqRaw || '').trim();
+    const teljesitmeny  = (teljRaw || '').trim();
+    const csatorna      = (csatornaRaw || '').trim();
+    const adohely       = (adohelyRaw || '').trim();
+    const cim           = (cimRaw || '').trim();
 
-    const frekvencia = p[0] || '';
-    const teljesitmeny = p.length > 1 ? p[1] : '';
-    const csatorna = p.length > 2 ? p[2] : '';
-    const cim = p.length > 3 ? p[3] : '';
-    const telepulesIdRaw = p.length > 4 ? p[4] : '';
-
-    let telepulesId = parseInt(telepulesIdRaw, 10);
-    if (isNaN(telepulesId)) {
-      telepulesId = null;
-    }
-
-    const tele = telepulesId != null ? teleById[telepulesId] : null;
-    const megye = tele ? megyeById[tele.megyeId] : null;
+    const tele = teleByName[adohely] || null;
 
     adok.push({
       id: idCounter++,
@@ -87,10 +89,10 @@ function initRadioData() {
       teljesitmeny,
       csatorna,
       cim,
-      telepulesId,
-      telepulesNev: tele ? tele.nev : '',
-      megyeNev: megye ? megye.megyeNev : '',
-      regioNev: megye ? megye.regioNev : ''
+      telepulesId: tele ? tele.id : null,
+      telepulesNev: tele ? tele.nev : adohely,
+      megyeNev: tele ? tele.megyeNev : '',
+      regioNev: tele ? tele.regioNev : ''
     });
   });
 
