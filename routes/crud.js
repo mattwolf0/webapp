@@ -19,7 +19,8 @@ router.get('/', (req, res) => {
 router.get('/new', requireAdmin, (req, res) => {
   res.render('crud-form', {
     ado: null,
-    hiba: null
+    hiba: null,
+    telepulesek: db.telepulesek || []
   });
 });
 
@@ -28,58 +29,67 @@ router.get('/edit/:id', requireAdmin, (req, res) => {
   const ado = db.adok.find(a => a.id === id) || null;
 
   if (!ado) {
-    return res.redirect('/crud');
+    return res.status(404).send('Nem található ilyen rádióadó');
   }
 
   res.render('crud-form', {
     ado,
-    hiba: null
+    hiba: null,
+    telepulesek: db.telepulesek || []
   });
 });
-
 router.post('/save', requireAdmin, (req, res) => {
-  const { id, frekvencia, teljesitmeny, csatorna, cim, telepulesNev, megyeNev, regioNev } = req.body;
+  const { id, frekvencia, teljesitmeny, csatorna, cim, telepulesId } = req.body;
 
-  if (!frekvencia || !teljesitmeny || !csatorna || !cim) {
-    const ado = {
-      id: id ? parseInt(id, 10) : null,
-      frekvencia,
-      teljesitmeny,
-      csatorna,
-      cim,
-      telepulesNev,
-      megyeNev,
-      regioNev
-    };
+  if (!frekvencia || !teljesitmeny || !csatorna || !cim || !telepulesId) {
+    const ado = id
+      ? db.adok.find(a => a.id === parseInt(id, 10)) || null
+      : null;
 
     return res.render('crud-form', {
       ado,
-      hiba: 'Minden kötelező mezőt ki kell tölteni.'
+      hiba: 'Minden mező kötelező.',
+      telepulesek: db.telepulesek || []
     });
   }
 
+  const teleId = parseInt(telepulesId, 10);
+  const tele = db.telepulesek.find(t => t.id === teleId) || null;
+
+  const frek = String(frekvencia).trim();
+  const telj = String(teljesitmeny).trim();
+  const csat = String(csatorna).trim();
+  const cimStr = String(cim).trim();
+
   if (id) {
-    const existing = db.adok.find(a => a.id === parseInt(id, 10));
-    if (existing) {
-      existing.frekvencia = frekvencia;
-      existing.teljesitmeny = teljesitmeny;
-      existing.csatorna = csatorna;
-      existing.cim = cim;
-      existing.telepulesNev = telepulesNev;
-      existing.megyeNev = megyeNev;
-      existing.regioNev = regioNev;
+    const ado = db.adok.find(a => a.id === parseInt(id, 10));
+
+    if (!ado) {
+      return res.status(404).send('Nem található ilyen rádióadó');
     }
+
+    ado.frekvencia = frek;
+    ado.teljesitmeny = telj;
+    ado.csatorna = csat;
+    ado.cim = cimStr;
+    ado.telepulesId = tele ? tele.id : null;
+    ado.telepulesNev = tele ? tele.nev : '';
+    ado.megyeNev = tele ? tele.megyeNev : '';
+    ado.regioNev = tele ? tele.regioNev : '';
+
   } else {
     const newId = db.getNextAdoId();
+
     db.adok.push({
       id: newId,
-      frekvencia,
-      teljesitmeny,
-      csatorna,
-      cim,
-      telepulesNev,
-      megyeNev,
-      regioNev
+      frekvencia: frek,
+      teljesitmeny: telj,
+      csatorna: csat,
+      cim: cimStr,
+      telepulesId: tele ? tele.id : null,
+      telepulesNev: tele ? tele.nev : '',
+      megyeNev: tele ? tele.megyeNev : '',
+      regioNev: tele ? tele.regioNev : ''
     });
   }
 
