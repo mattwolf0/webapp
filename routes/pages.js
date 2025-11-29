@@ -84,10 +84,17 @@ router.post('/kapcsolat', requireLogin, (req, res) => {
 });
 
 router.get('/uzenetek', requireLogin, (req, res) => {
+  const rendezett = [...db.uzenetek].sort((a, b) => {
+    const tA = new Date(a.letrehozva).getTime();
+    const tB = new Date(b.letrehozva).getTime();
+    return tB - tA;
+  });
+
   res.render('uzenetek', {
-    uzenetek: db.uzenetek
+    uzenetek: rendezett
   });
 });
+
 
 router.get('/admin', requireAdmin, (req, res) => {
   res.render('admin', {
