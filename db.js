@@ -5,6 +5,7 @@ const dataDir = path.join(__dirname, 'data');
 
 function loadLines(filename) {
   const fullPath = path.join(dataDir, filename);
+
   if (!fs.existsSync(fullPath)) {
     console.warn('Hiányzó adatfájl:', fullPath);
     return [];
@@ -21,6 +22,7 @@ let telepulesek = [];
 let adok = [];
 
 let nextAdoId = 1;
+
 
 function initRadioData() {
   const regioLines = loadLines('regio.txt');
@@ -75,11 +77,11 @@ function initRadioData() {
 
     const [freqRaw, teljRaw, csatornaRaw, adohelyRaw, cimRaw] = line.split('\t');
 
-    const frekvencia    = (freqRaw || '').trim();
-    const teljesitmeny  = (teljRaw || '').trim();
-    const csatorna      = (csatornaRaw || '').trim();
-    const adohely       = (adohelyRaw || '').trim();
-    const cim           = (cimRaw || '').trim();
+    const frekvencia   = (freqRaw || '').trim();
+    const teljesitmeny = (teljRaw || '').trim();
+    const csatorna     = (csatornaRaw || '').trim();
+    const adohely      = (adohelyRaw || '').trim();
+    const cim          = (cimRaw || '').trim();
 
     const tele = teleByName[adohely] || null;
 
@@ -97,7 +99,10 @@ function initRadioData() {
   });
 
   nextAdoId = idCounter;
+
+  console.log(`Rádiós adatok betöltve. Régiók: ${regiok.length}, települések: ${telepulesek.length}, adók: ${adok.length}`);
 }
+
 
 const users = [
   { id: 1, username: 'admin', email: 'admin@example.com', password: 'admin', role: 'admin' }
@@ -130,5 +135,6 @@ module.exports = {
   regiok,
   getNextUserId,
   getNextUzenetId,
-  getNextAdoId
+  getNextAdoId,
+  reloadRadioData: initRadioData
 };
