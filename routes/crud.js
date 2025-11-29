@@ -2,9 +2,9 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
-function requireAdmin(req, res, next) {
-  if (!req.session.user || req.session.user.role !== 'admin') {
-    return res.status(403).send('Nincs jogosultság');
+function requireLogin(req, res, next) {
+  if (!req.session.user) {
+    return res.redirect('/login');
   }
   next();
 }
@@ -16,7 +16,7 @@ router.get('/', (req, res) => {
   });
 });
 
-router.get('/new', requireAdmin, (req, res) => {
+router.get('/new', requireLogin, (req, res) => {
   res.render('crud-form', {
     ado: null,
     hiba: null,
@@ -24,7 +24,7 @@ router.get('/new', requireAdmin, (req, res) => {
   });
 });
 
-router.get('/edit/:id', requireAdmin, (req, res) => {
+router.get('/edit/:id', requireLogin, (req, res) => {
   const id = parseInt(req.params.id, 10);
   const ado = db.adok.find(a => a.id === id) || null;
 
@@ -38,7 +38,8 @@ router.get('/edit/:id', requireAdmin, (req, res) => {
     telepulesek: db.telepulesek || []
   });
 });
-router.post('/save', requireAdmin, (req, res) => {
+
+router.post('/save', requireLogin, (req, res) => {
   const { id, frekvencia, teljesitmeny, csatorna, cim, telepulesId } = req.body;
 
   if (!frekvencia || !teljesitmeny || !csatorna || !cim || !telepulesId) {
@@ -76,7 +77,6 @@ router.post('/save', requireAdmin, (req, res) => {
     ado.telepulesNev = tele ? tele.nev : '';
     ado.megyeNev = tele ? tele.megyeNev : '';
     ado.regioNev = tele ? tele.regioNev : '';
-
   } else {
     const newId = db.getNextAdoId();
 
@@ -96,7 +96,7 @@ router.post('/save', requireAdmin, (req, res) => {
   res.redirect('/crud');
 });
 
-router.get('/delete/:id', requireAdmin, (req, res) => {
+router.get('/delete/:id', requireLogin, (req, res) => {
   const id = parseInt(req.params.id, 10);
   const index = db.adok.findIndex(a => a.id === id);
 
