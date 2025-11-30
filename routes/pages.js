@@ -2,9 +2,11 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
+const BASE_PATH = '/app013';
+
 function requireLogin(req, res, next) {
   if (!req.session.user) {
-    return res.redirect('/login');
+    return res.redirect(BASE_PATH + '/login');
   }
   next();
 }
@@ -156,7 +158,7 @@ router.post('/admin/uzenetek/:id/valasz', requireAdmin, (req, res) => {
     adminValasz: true
   });
 
-  res.redirect('/uzenetek');
+  res.redirect(BASE_PATH + '/uzenetek');
 });
 
 module.exports = router;
