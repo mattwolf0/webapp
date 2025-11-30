@@ -5,7 +5,6 @@ const dataDir = path.join(__dirname, 'data');
 
 function loadLines(filename) {
   const fullPath = path.join(dataDir, filename);
-
   if (!fs.existsSync(fullPath)) {
     console.warn('Hiányzó adatfájl:', fullPath);
     return [];
@@ -22,7 +21,6 @@ let telepulesek = [];
 let adok = [];
 
 let nextAdoId = 1;
-
 
 function initRadioData() {
   const regioLines = loadLines('regio.txt');
@@ -77,11 +75,11 @@ function initRadioData() {
 
     const [freqRaw, teljRaw, csatornaRaw, adohelyRaw, cimRaw] = line.split('\t');
 
-    const frekvencia   = (freqRaw || '').trim();
-    const teljesitmeny = (teljRaw || '').trim();
-    const csatorna     = (csatornaRaw || '').trim();
-    const adohely      = (adohelyRaw || '').trim();
-    const cim          = (cimRaw || '').trim();
+    const frekvencia    = (freqRaw || '').trim();
+    const teljesitmeny  = (teljRaw || '').trim();
+    const csatorna      = (csatornaRaw || '').trim();
+    const adohely       = (adohelyRaw || '').trim();
+    const cim           = (cimRaw || '').trim();
 
     const tele = teleByName[adohely] || null;
 
@@ -99,19 +97,61 @@ function initRadioData() {
   });
 
   nextAdoId = idCounter;
-
-  console.log(`Rádiós adatok betöltve. Régiók: ${regiok.length}, települések: ${telepulesek.length}, adók: ${adok.length}`);
 }
 
+const usersFile = path.join(dataDir, 'users.json');
+const uzenetekFile = path.join(dataDir, 'uzenetek.json');
 
-const users = [
-  { id: 1, username: 'admin', email: 'admin@example.com', password: 'admin', role: 'admin' }
-];
-
-let nextUserId = 2;
-
-const uzenetek = [];
+let users = [];
+let uzenetek = [];
+let nextUserId = 1;
 let nextUzenetId = 1;
+
+function loadJson(fullPath, fallback) {
+  if (!fs.existsSync(fullPath)) {
+    return fallback;
+  }
+  try {
+    const raw = fs.readFileSync(fullPath, 'utf8');
+    return JSON.parse(raw);
+  } catch (err) {
+    console.error('Hiba JSON betöltésekor:', fullPath, err);
+    return fallback;
+  }
+}
+
+function saveJson(fullPath, data) {
+  try {
+    fs.writeFileSync(fullPath, JSON.stringify(data, null, 2), 'utf8');
+  } catch (err) {
+    console.error('Hiba JSON mentésekor:', fullPath, err);
+  }
+}
+
+function initUsers() {
+  const stored = loadJson(usersFile, null);
+  if (stored && Array.isArray(stored) && stored.length > 0) {
+    users = stored;
+  } else {
+    users = [
+      {
+        id: 1,
+        username: 'admin',
+        email: 'admin@example.com',
+        password: 'admin',
+        role: 'admin'
+      }
+    ];
+    saveJson(usersFile, users);
+  }
+  nextUserId = users.reduce((max, u) => Math.max(max, u.id), 0) + 1;
+}
+
+function initUzenetek() {
+  const stored = loadJson(uzenetekFile, []);
+  uzenetek = Array.isArray(stored) ? stored : [];
+  nextUzenetId = uzenetek.reduce((max, u) => Math.max(max, u.id), 0) + 1;
+}
 
 function getNextUserId() {
   return nextUserId++;
@@ -125,7 +165,18 @@ function getNextAdoId() {
   return nextAdoId++;
 }
 
+function saveUsers() {
+  saveJson(usersFile, users);
+}
+
+function saveUzenetek() {
+  saveJson(uzenetekFile, uzenetek);
+}
+
+
 initRadioData();
+initUsers();
+initUzenetek();
 
 module.exports = {
   users,
@@ -136,5 +187,6 @@ module.exports = {
   getNextUserId,
   getNextUzenetId,
   getNextAdoId,
-  reloadRadioData: initRadioData
+  saveUsers,
+  saveUzenetek
 };

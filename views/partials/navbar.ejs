@@ -1,12 +1,10 @@
 <% const page = typeof activePage !== 'undefined' ? activePage : ''; %>
-<% const user = typeof currentUser !== 'undefined' && currentUser ? currentUser : null; %>
-<% const isLoggedIn = !!user; %>
-<% const role = user ? user.role : null; %>
-<% const displayName = user ? (user.name || user.username || user.email) : ''; %>
+<% const isLoggedIn = !!currentUser; %>
+<% const isAdmin = isLoggedIn && (currentUser.role === 'admin' || currentUser.username === 'admin'); %>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container-fluid">
-    <a class="navbar-brand fw-bold" href="./">RádióAdók</a>
+    <a class="navbar-brand fw-bold" href="<%= basePath %>/">RádióAdók</a>
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
             data-bs-target="#navbarNav" aria-controls="navbarNav"
@@ -18,28 +16,31 @@
 
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item">
-          <a class="nav-link <%= page === 'index' ? 'active' : '' %>" href="./">Főoldal</a>
+          <a class="nav-link <%= page === 'index' ? 'active' : '' %>" href="<%= basePath %>/">Főoldal</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link <%= page === 'adatbazis' ? 'active' : '' %>" href="adatbazis">Adatbázis</a>
+          <a class="nav-link <%= page === 'adatbazis' ? 'active' : '' %>" href="<%= basePath %>/adatbazis">Adatbázis</a>
         </li>
 
-        <% if (isLoggedIn && (role === 'user' || role === 'admin')) { %>
+        <% if (isLoggedIn && !isAdmin) { %>
           <li class="nav-item">
-            <a class="nav-link <%= page === 'kapcsolat' ? 'active' : '' %>" href="kapcsolat">Kapcsolat</a>
+            <a class="nav-link <%= page === 'kapcsolat' ? 'active' : '' %>" href="<%= basePath %>/kapcsolat">Kapcsolat</a>
           </li>
+        <% } %>
+
+        <% if (isLoggedIn) { %>
           <li class="nav-item">
-            <a class="nav-link <%= page === 'uzenetek' ? 'active' : '' %>" href="uzenetek">Üzenetek</a>
+            <a class="nav-link <%= page === 'uzenetek' ? 'active' : '' %>" href="<%= basePath %>/uzenetek">Üzenetek</a>
           </li>
         <% } %>
 
         <li class="nav-item">
-          <a class="nav-link <%= page === 'crud' ? 'active' : '' %>" href="crud">CRUD</a>
+          <a class="nav-link <%= page === 'crud' ? 'active' : '' %>" href="<%= basePath %>/crud">CRUD</a>
         </li>
 
-        <% if (role === 'admin') { %>
+        <% if (isAdmin) { %>
           <li class="nav-item">
-            <a class="nav-link <%= page === 'admin' ? 'active' : '' %>" href="admin">Admin</a>
+            <a class="nav-link <%= page === 'admin' ? 'active' : '' %>" href="<%= basePath %>/admin">Admin</a>
           </li>
         <% } %>
       </ul>
@@ -47,20 +48,20 @@
       <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
         <% if (!isLoggedIn) { %>
           <li class="nav-item">
-            <a class="nav-link <%= page === 'login' ? 'active' : '' %>" href="login">Bejelentkezés</a>
+            <a class="nav-link <%= page === 'login' ? 'active' : '' %>" href="<%= basePath %>/login">Bejelentkezés</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link <%= page === 'register' ? 'active' : '' %>" href="register">Regisztráció</a>
+            <a class="nav-link <%= page === 'register' ? 'active' : '' %>" href="<%= basePath %>/register">Regisztráció</a>
           </li>
         <% } else { %>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button"
                data-bs-toggle="dropdown" aria-expanded="false">
-              <span><%= displayName %></span>
+              <span><%= currentUser.username || currentUser.name %></span>
             </a>
             <ul class="dropdown-menu dropdown-menu-end">
               <li>
-                <form action="logout" method="post" class="px-3">
+                <form action="<%= basePath %>/logout" method="post" class="px-3">
                   <button type="submit" class="btn btn-link p-0">
                     Kijelentkezés
                   </button>

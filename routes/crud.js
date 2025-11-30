@@ -2,9 +2,11 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
+const BASE_PATH = '/app013';
+
 function requireLogin(req, res, next) {
   if (!req.session.user) {
-    return res.redirect('/login');
+    return res.redirect(BASE_PATH + '/login');
   }
   next();
 }
@@ -93,7 +95,7 @@ router.post('/save', requireLogin, (req, res) => {
     });
   }
 
-  res.redirect('/crud');
+  res.redirect(BASE_PATH + '/crud');
 });
 
 router.get('/delete/:id', requireLogin, (req, res) => {
@@ -104,7 +106,7 @@ router.get('/delete/:id', requireLogin, (req, res) => {
     db.adok.splice(index, 1);
   }
 
-  res.redirect('/crud');
+  res.redirect(BASE_PATH + '/crud');
 });
 
 module.exports = router;

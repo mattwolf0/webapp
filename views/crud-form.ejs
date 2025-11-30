@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Rádióadó űrlap – Rádióadók</title>
+  <title><%= ado ? 'Rádióadó szerkesztése' : 'Új rádióadó' %> – Rádióadók</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
@@ -15,78 +15,68 @@
     <div class="col-lg-6">
       <div class="card shadow-sm">
         <div class="card-body">
-          <h1 class="h3 mb-4">
-            <%= ado && ado.id ? 'Rádióadó szerkesztése' : 'Új rádióadó hozzáadása' %>
+          <h1 class="h4 mb-4">
+            <%= ado ? 'Rádióadó szerkesztése' : 'Új rádióadó felvétele' %>
           </h1>
 
           <% if (hiba) { %>
             <div class="alert alert-danger"><%= hiba %></div>
           <% } %>
 
-          <form action="/crud/save" method="post">
-            <input type="hidden" name="id" value="<%= ado && ado.id ? ado.id : '' %>">
+          <form action="save" method="post">
+            <% if (ado) { %>
+              <input type="hidden" name="id" value="<%= ado.id %>">
+            <% } %>
 
             <div class="mb-3">
               <label class="form-label">Frekvencia (MHz)</label>
-              <input type="number" step="0.1" min="0"
-                     class="form-control"
-                     name="frekvencia"
-                     value="<%= ado && ado.frekvencia != null ? ado.frekvencia : '' %>"
-                     required>
+              <input type="text" name="frekvencia" class="form-control"
+                     value="<%= ado && ado.frekvencia != null ? ado.frekvencia : '' %>" required>
             </div>
 
             <div class="mb-3">
               <label class="form-label">Teljesítmény (kW)</label>
-              <input type="number" step="0.01" min="0"
-                     class="form-control"
-                     name="teljesitmeny"
-                     value="<%= ado && ado.teljesitmeny != null ? ado.teljesitmeny : '' %>"
-                     required>
+              <input type="text" name="teljesitmeny" class="form-control"
+                     value="<%= ado && ado.teljesitmeny != null ? ado.teljesitmeny : '' %>" required>
             </div>
 
             <div class="mb-3">
               <label class="form-label">Csatorna</label>
-              <input type="text" class="form-control"
-                     name="csatorna"
-                     value="<%= ado && ado.csatorna ? ado.csatorna : '' %>"
-                     required>
+              <input type="text" name="csatorna" class="form-control"
+                     value="<%= ado && ado.csatorna ? ado.csatorna : '' %>" required>
             </div>
 
             <div class="mb-3">
               <label class="form-label">Adóhely / cím</label>
-              <input type="text" class="form-control"
-                     name="cim"
-                     value="<%= ado && ado.cim ? ado.cim : '' %>"
-                     required>
+              <input type="text" name="cim" class="form-control"
+                     value="<%= ado && ado.cim ? ado.cim : '' %>" required>
             </div>
 
             <div class="mb-3">
               <label class="form-label">Település</label>
-              <select class="form-select" name="telepulesId" required>
-                <option value="" disabled <%= !(ado && ado.telepules) ? 'selected' : '' %>>
-                  Válassz települést...
-                </option>
-
+              <select name="telepulesId" class="form-select" required>
+                <option value="">Válassz települést...</option>
                 <% if (Array.isArray(telepulesek)) { %>
                   <% telepulesek.forEach(function(t) { %>
                     <option value="<%= t.id %>"
-                      <%= (ado && (
-                            ado.telepulesId === t.id ||
-                            (ado.telepules && ado.telepules.id === t.id)
-                          )) ? 'selected' : '' %>>
-                      <%= t.nev %>
+                      <%= ado && ado.telepulesId === t.id ? 'selected' : '' %>>
+                      <%= t.nev %> (<%= t.megyeNev %>)
                     </option>
-                  <% }); %>
+                  <% }) %>
                 <% } %>
               </select>
             </div>
 
-            <div class="d-flex gap-2 justify-content-end">
-              <a href="/crud" class="btn btn-outline-secondary">Mégse</a>
-              <button type="submit" class="btn btn-primary">Mentés</button>
+            <div class="d-flex justify-content-between">
+              <a href="." class="btn btn-outline-secondary">
+                Mégse
+              </a>
+              <button type="submit" class="btn btn-primary">
+                Mentés
+              </button>
             </div>
-
           </form>
+
         </div>
       </div>
     </div>

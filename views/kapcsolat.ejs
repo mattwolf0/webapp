@@ -25,48 +25,32 @@
             <div class="alert alert-success"><%= siker %></div>
           <% } %>
 
-          <form action="/kapcsolat" method="post">
+          <form action="<%= basePath %>/kapcsolat" method="post">
             <div class="mb-3">
               <label class="form-label">Név</label>
-              <input
-                type="text"
-                class="form-control"
-                name="kuldoNev"
-                value="<%= kuldoNev || '' %>"
-                required>
+              <input type="text" class="form-control" name="kuldoNev"
+                     value="<%= kuldoNev || '' %>" required>
             </div>
 
             <div class="mb-3">
               <label class="form-label">E-mail cím</label>
-              <input
-                type="email"
-                class="form-control"
-                name="kuldoEmail"
-                value="<%= kuldoEmail || '' %>"
-                required>
+              <input type="email" class="form-control" name="kuldoEmail"
+                     value="<%= kuldoEmail || '' %>" required>
             </div>
 
             <div class="mb-3">
               <label class="form-label">Tárgy</label>
-              <input
-                type="text"
-                class="form-control"
-                name="targy"
-                value="<%= targy || '' %>"
-                required>
+              <input type="text" class="form-control" name="targy"
+                     value="<%= targy || '' %>" required>
             </div>
 
             <div class="mb-3">
               <label class="form-label">Üzenet</label>
-              <textarea
-                class="form-control"
-                rows="4"
-                name="szoveg"
-                required><%= szoveg || '' %></textarea>
+              <textarea class="form-control" rows="4" name="szoveg" required><%= szoveg || '' %></textarea>
             </div>
 
             <div class="d-flex justify-content-between align-items-center">
-              <a href="/" class="btn btn-outline-secondary">
+              <a href="<%= basePath %>/uzenetek" class="btn btn-outline-secondary">
                 Mégse
               </a>
               <button type="submit" class="btn btn-primary">

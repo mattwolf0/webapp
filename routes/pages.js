@@ -89,6 +89,8 @@ router.post('/kapcsolat', requireLogin, (req, res) => {
     adminValasz: false
   });
 
+  db.saveUzenetek();
+
   const currentUser = req.session.user || {};
 
   res.render('kapcsolat', {
@@ -157,6 +159,8 @@ router.post('/admin/uzenetek/:id/valasz', requireAdmin, (req, res) => {
     letrehozva,
     adminValasz: true
   });
+
+  db.saveUzenetek();
 
   res.redirect(BASE_PATH + '/uzenetek');
 });

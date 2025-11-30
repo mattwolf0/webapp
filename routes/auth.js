@@ -56,6 +56,8 @@ router.post('/register', (req, res) => {
   };
 
   db.users.push(newUser);
+  db.saveUsers();
+
   res.redirect(BASE_PATH + '/login');
 });
 
